@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Posture Police</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap" id="app">
+  <header class="top">
+    <svg width="54" height="62" viewBox="0 0 54 62" aria-hidden="true">
+      <path d="M27 2 L50 10 V30 C50 44 40 54 27 60 C14 54 4 44 4 30 V10 Z" fill="#E4B43A"/>
+      <path d="M27 10 L44 16 V30 C44 40 37 47 27 52 C17 47 10 40 10 30 V16 Z" fill="#16213A"/>
+      <path d="M27 18 l3.4 7 7.6 1 -5.6 5.3 1.4 7.6 -6.8 -3.7 -6.8 3.7 1.4 -7.6 -5.6 -5.3 7.6 -1z" fill="#E4B43A"/>
+    </svg>
+    <div>
+      <h1>Posture Police</h1>
+      <p class="sub">Officer Upright watches your back so you don't have to.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT: camera -->
+    <section aria-label="Camera">
+      <div class="lightbar" aria-hidden="true"><i class="bar-r"></i><i class="bar-b"></i></div>
+      <div class="stage" id="stage">
+        <video id="video" playsinline muted></video>
+        <canvas id="overlay"></canvas>
+        <div class="placeholder" id="placeholder"><p>Press Start patrol to switch on your camera. Video is processed on this device and never uploaded.</p></div>
+        <div id="count" aria-hidden="true"></div>
+        <div class="pill" id="pill" data-state="idle" aria-live="polite">
+          <span id="pillText">Camera off</span>
+          <span class="num" id="score">—</span>
+        </div>
+      </div>
+      <div class="meter" aria-hidden="true"><div id="meterFill"></div></div>
+      <div class="meter-label"><span>Posture score</span><span id="meterNote">Start patrol to begin</span></div>
+
+      <div class="row">
+        <button class="btn primary" id="startBtn">Start patrol</button>
+        <button class="btn ghost" id="calBtn" disabled>Recalibrate</button>
+        <button class="btn ghost" id="testBtn">Test a roast</button>
+      </div>
+      <p id="notice" role="alert"></p>
+      <p class="hint">Calibrate while sitting the way you want to sit: back tall, shoulders relaxed, both shoulders and ears in frame. Keep this window visible (a small window at the edge of your screen works); browsers slow down hidden tabs.</p>
+    </section>
+
+    <!-- RIGHT: officer + stats + log + settings -->
+    <section aria-label="Officer Upright">
+      <div class="bot-row">
+        <svg id="bot" data-mood="idle" viewBox="0 0 160 160" role="img" aria-label="Officer Upright, a robot police officer">
+          <rect id="beacon" x="68" y="8" width="24" height="13" rx="5"/>
+          <path d="M34 64 Q34 22 80 22 Q126 22 126 64 Z" fill="#0F1830"/>
+          <rect x="24" y="58" width="112" height="11" rx="5.5" fill="#0A1024"/>
+          <path d="M80 28 l4.2 8.4 9.3 1.2 -6.8 6.4 1.8 9.2 -8.5 -4.6 -8.5 4.6 1.8 -9.2 -6.8 -6.4 9.3 -1.2z" fill="#E4B43A"/>
+          <rect x="30" y="68" width="100" height="72" rx="20" fill="#C9D3E8"/>
+          <circle cx="30" cy="104" r="8" fill="#8FA0C4"/><circle cx="130" cy="104" r="8" fill="#8FA0C4"/>
+          <rect x="42" y="80" width="76" height="48" rx="12" fill="#101A33"/>
+          <g class="eyes-open" fill="#7CE3FF"><circle cx="63" cy="99" r="7"/><circle cx="97" cy="99" r="7"/></g>
+          <g class="eyes-happy" fill="none" stroke="#7CE3FF" stroke-width="4" stroke-linecap="round"><path d="M55 102 Q63 91 71 102"/><path d="M89 102 Q97 91 105 102"/></g>
+          <g class="eyes-closed" fill="none" stroke="#7CE3FF" stroke-width="4" stroke-linecap="round"><path d="M55 100 H71"/><path d="M89 100 H105"/></g>
+          <g class="brows" fill="none" stroke="#FF6B6B" stroke-width="4.5" stroke-linecap="round"><path d="M53 87 L72 94"/><path d="M107 87 L88 94"/></g>
+          <path class="m-flat" d="M68 116 H92" fill="none" stroke="#7CE3FF" stroke-width="4" stroke-linecap="round"/>
+          <path class="m-frown" d="M66 120 Q80 109 94 120" fill="none" stroke="#FF6B6B" stroke-width="4" stroke-linecap="round"/>
+          <path class="m-smile" d="M66 112 Q80 124 94 112" fill="none" stroke="#7CE3FF" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <div class="bubble" aria-live="polite"><span id="bubbleText">Officer Upright, reporting for duty. Press Start patrol.</span></div>
+      </div>
+
+      <dl class="stats">
+        <div><dt>Clean streak</dt><dd id="streak">00:00</dd></div>
+        <div><dt>Best streak</dt><dd id="best">00:00</dd></div>
+        <div><dt>Good posture</dt><dd id="pct">—</dd></div>
+      </dl>
+
+      <div class="ticket">
+        <div class="ticket-head"><h2>Citations</h2><span id="citeCount">0 issued</span></div>
+        <ol id="log"></ol>
+        <p class="empty" id="logEmpty">No citations yet. Keep it that way.</p>
+      </div>
+
+      <div class="settings">
+        <h2>Rules of engagement</h2>
+        <div class="field">
+          <span class="lbl" id="toneLbl">Officer's attitude</span>
+          <div class="seg" role="radiogroup" aria-labelledby="toneLbl">
+            <label><input type="radio" name="tone" value="gentle"><span>Gentle</span></label>
+            <label><input type="radio" name="tone" value="sarcastic"><span>Sarcastic</span></label>
+            <label><input type="radio" name="tone" value="savage"><span>Savage</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="sens">Strictness <span class="val" id="sensVal"></span></label>
+          <input type="range" id="sens" min="1" max="5" step="1">
+          <div class="ends"><span>Relaxed</span><span>Strict</span></div>
+        </div>
+        <div class="field">
+          <label for="grace">Grace period <span class="val" id="graceVal"></span></label>
+          <input type="range" id="grace" min="2" max="15" step="1">
+          <div class="ends"><span>Quick to cite</span><span>Forgiving</span></div>
+        </div>
+        <div class="field checks">
+          <label><input type="checkbox" id="sound"> Siren sound</label>
+          <label><input type="checkbox" id="voice"> Officer speaks</label>
+        </div>
+        <div class="field">
+          <label for="voiceSel">Officer's voice</label>
+          <select id="voiceSel"></select>
+          <p class="small">Voices come from your device, so the list differs on every computer. Female-sounding voices are listed first; pick another if one doesn't suit you.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+</body>
+</html>
